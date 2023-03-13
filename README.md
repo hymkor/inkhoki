@@ -323,7 +323,7 @@ go32.exeがいつもついてまわるのが嫌だったので、C++で組んで
 参考文献
 --------
 
-- 「DOS/Vプログラミングガイド」 最上　晃 著
-- LSI C-86 Ver.3.30c 試食版ﾕｰｻﾞｰｽﾞﾏﾆｭｱﾙ "LSIC86.MAN" ｴﾙ･ｴｽ･ｱｲ ｼﾞｬﾊﾟﾝ(株)
-- 「DOS/Vプログラマーズハンドブック」C.F.Computing 著
+- [「DOS/Vプログラミングガイド」 最上　晃 著](https://www.amazon.co.jp/dp/4756104460)
+- [LSI C-86 Ver.3.30c 試食版](http://www.lsi-j.co.jp/freesoft/)(ﾕｰｻﾞｰｽﾞﾏﾆｭｱﾙ "LSIC86.MAN" ｴﾙ･ｴｽ･ｱｲ ｼﾞｬﾊﾟﾝ(株)
+- [「DOS/Vプログラマーズハンドブック」C.F.Computing 著](https://www.amazon.co.jp/dp/4890524290)
 - I/O別冊「Computer fan」1994 2号 "BMPビューア" 田嶋 孝行 著
