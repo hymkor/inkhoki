@@ -5,7 +5,7 @@
 
 all : manual.doc hayper.lib
 
-clear :
+clean :
 	erase _*.lib
 	erase *.obj
 	erase make.i
@@ -29,7 +29,7 @@ _vramoff.lib	: vramoff.l
 _beta.lib	: beta.l
 	libr -o $@ $<
 _bmptobg.obj	: bmptobg.c
-	libr -o $@ $<
+	lcc -o $@ -c $<
 _keyb.lib	: scnkey.l
 	libr -o $@ $<
 _mice.lib	: mice.l
@@ -44,4 +44,3 @@ _console.lib	: console.l
 	libr -o $@ $<
 _others.lib	: gputat.obj _bmptobg.obj vramcopy.obj
 	oar ruc $@ $#
-
