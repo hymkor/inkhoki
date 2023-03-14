@@ -1,0 +1,247 @@
+
+★ 標準ヘッダ ------------------------------------------- #include "macros.h"
+
+numof(配列名)
+        配列の個数を返す。sizeof(全体のサイズ)/size(要素のサイズ)
+
+unsigned short intsqrt(unsigned long x,unsigned *a);
+        整数xの平方根を越えない最大の整数を返し、a != NULL ならば、 xと帰り値
+        の平方との差を*aに返す。
+
+unsigned char idling(void);
+        DOS5からサポートされたアイドリングのコールを行う。 何もしないときに呼
+        ぶと、マルチタスクの効率がよくなる。DOSでは
+
+★ メモリライブラリ
+
+        比較的小さな変数の領域をmallocで確保するとき、 malloc用ヘッダの大きさ
+        が馬鹿にばらない。これをさけるには、変数n個分のメモリを一度のmallocで
+        確保するなどすれば、ヘッダの占める割合を1/nにできる。
+
+        garbageライブラリはその為のライブラリである。
+
+        代償として、
+         ・可変長構造体などは扱えない。
+         ・解放したメモリは、解放前の型の変数用にしか再利用されない。
+        等があげられる。
+
+
+
+garbage_t 制御変数=GARTYPE(型); [near版] farbage_t 制御変数=GARTYPE(型); [far
+版]
+
+nearポインタ=garbage_malloc(制御変数);
+ farポインタ=farbage_malloc(制御変数);
+
+garbage_free(nearポインタ); farbage_free( farポインタ);
+
+
+
+
+
+★ リアルタイム キースキャン ライブラリ ------------------- #include "keyb.h"
+
+
+volatile unsigned char scantable[128];
+volatile unsigned char lastkey;
+int scankey_init(void);
+
+
+        関数 scankey_init を実行すると、割りこみを横取りして、 以後キーボード
+        の状態が自動的にscantable[128],lastkeyに反映されるようになる。
+
+        キーが押されていると、scantable[スキャンコード] が 0 以外の値をとり、
+        離されていると 0 になる。lastkeyには、 最後に変化したキーのスキャンコ
+        ードが入る。押された時はそのまま、離された時は +128 の値が入る。
+
+        scankey_initは割りこみ横取りの解除ルーチンをatexitに登録するが、 失敗
+        した場合は横取りせずに終了し、  非０を返す。 帰り値は必ずチェックする
+        こと。
+
+
+void kill_keyb(void);
+void wake_keyb(void);
+
+        kill～は以後キーボードをロックし、wake～は解除する。
+
+        ロック中はscantableとlastkey以外の手段では、 何者もキーを認識できなく
+        なる(当然getchとかも)。
+
+        そのため、キーバッファのオーバーフローによる、 BEEP音の嵐を回避するこ
+        とができる。
+
+        なお、ロック中は CTRL+ALT+DELが効かなくなる。なんてこった。
+
+
+
+void LED(unsigned flag); enum{  ScrollLockLed  =  1,   NumLockLed   =   2   ,
+                                CapsLockLed  = 4 }; キーボードのLEDをコントロ
+                                ールする。Onにしたいキーの定数を`|'で結ぶ。
+
+★ ビデオ共通ライブラリ ---------------------------------- #include "video.h"
+
+
+void set_video_mode(int x);
+int  get_video_mode(void);
+        画面モードを設定/取得するマクロ。320×200×256色は「0x13(13h)」とすれ
+        ばよい。DOSに戻る前に、元のモードに戻して置くことを忘れないように
+
+int  get_dspx(void);
+        get_video_modeと同じ関数。IBM DOS/V Extensionの`日本語'の縦長テキスト
+        モードならば、(-3)を返す。
+
+void set_dspx(int mode);
+        set_video_modeと同じ。  ただし、  modeに(-3)を入れると、  IBM   DOS/V
+        Extension  の縦長テキストモードにする。英語モードだとハングしてしまう
+        ので、 直接(-3)を入れずに、  get_dspx()の戻り値だけを与えるのがよい。
+        get_dspx()は英語モードに(-3)を返すことはない。
+
+int vsync(void);
+        垂直帰線期間中ならば 0 以外の値をとる。
+
+★ 画面モード13h(320×200×256色)用ライブラリ ----------- #include "sprite.h"
+
+void add_vram_offset_13h( signed int delta );
+        ハードウェアスクロールさせる。なお、delta=Δx+320×Δy。
+
+
+unsigned char GRAM[200][320];
+unsigned char VRAM[200][320];
+        13hモード時のVRAMを二次元配列風にアクセスできるようにしたマクロ。
+        「VRAM」の方はハードウエアスクロールに対応しているが、その分遅い。
+
+★ 擬似スプライトシステムライブラリ --------------------- #include "sprite.h"
+
+
+　画面モード13hにおいて、重ね合せ等をサポートしたグラフィックパターン表示のた
+めのライブラリである。以下では「スプライト」という単語を頻繁に使用しているが、
+もちろん、IBM-PCのハードウェアでスプライトを実現しているわけではなく、 単なる
+パターンの重ね合せ表示のライブラリにすぎないことをことわっておく。 スプライト
+と呼んでいるのはゴロがよくて呼びやすいからであって、そんな大層なものではない。
+
+　スクロールゲームも可能だが、 ハードウェアスクロールをさせるとスプライトもい
+っしょに流れていってしまう欠点がある。 対策としては、走査線の垂直帰線期間中に
+表示していただく(消去&表示)。そのため、スクロールゲームに限っては、巨大なパタ
+ーンをワンサカ使うのは難しい。しかし、速いCPUならば問題あるまい(ああ、 まるで
+?UST-SYSTEM)。
+
+　本ライブラリでは、スプライトパターン(pattern_t)と背景セル(beta_t)という二種
+類のデータ構造を用意している。前者は単独で扱い、サイズは任意で、 文字通りスプ
+ライトのように使う。 後者は、128×128ドットの固定サイズで、これを切り貼りして
+背景を構成するのに使う。
+        ─ SKIPDOT形式(pattern_t) ─────────────────────
+        2 bytes VRAMスキップbyte数=Δx+320*Δy
+        2 bytes VRAM描画byte数(=:n)
+        n bytes カラーパターン(1byte=1dot)
+        2 bytes VRAMスキップbyte数=Δx+320*Δy
+         :       :
+        n'bytes カラーパターン
+        2 bytes =0
+        2 bytes =0
+        ──────────────────────────────────
+
+        ─ BETA形式(beta_tの場合:w=h=128固定) ───────────────
+        w×h bytes カラーパターン
+        w×h bits  マスクパターン(MSBが左側のドットをしめす)
+        ──────────────────────────────────
+
+
+int sprite_init( void );
+        背景バッファの確保など、擬似スプライトシステム周りを初期化する。
+
+unsigned char BGRAM[200][320];
+        背景バッファ。背景を描く時に「BGRAM[y][x] = VRAM[y][x] = c;」等と書い
+        ておけば、上をスプライトパターンを重ねても、 パターンの消去時に自動的
+        に回復される。二次元配列風に扱えるが、実はマクロであり、sprite_initを
+        実行するまで存在しないので注意!
+
+pattern_t sprite_load( const char *fname );
+        SKIPDOT形式でセーブされた単一のスプライトをロードする。1ファイルを1パ
+        ターンとしてしかロードできない。複数のパターンを1ファイルとしてロード
+        したいときは、beta_openとbeta_to_spriteを使う。
+
+short sprite_putat( int x , int y , pattern_t pattern );
+        (x,y)を基準にパターンを表示する。帰り値は表示したパターンのVRAM上のア
+        ドレスであり、sprite_putoffに渡すべき値である。なお、パターンにはIDが
+        あるわけではないので、別の位置に表示しなおしても、 前の位置のパターン
+        が自動的に消えるわけではない。
+
+void sprite_putoff( short address , pattern_t pattern );
+        表示したパターンを消去し、パターンの位置にあった背景を回復する。
+
+void bgcls( void );
+        背景バッファを 黒一色とする。
+
+void bgsync( void );
+        現在、 画面に表示されている全内容をそのまま背景バッファに貼りつけてし
+        まう。その時点で表示されているスプライトがsprite_putoffで消えなくなっ
+        てしまうので、注意。
+
+int bmp_bgload( const char *fname , int palette_load_flag );
+        *.BMPファイルを画面&背景バッファにロードする。palette_load_flagが 0で
+        ない時は、パレットもロードする。なお、 320×200に収まらない部分につい
+        ては表示しない。
+
+beta_t beta_open( const char *fname );
+        背景セルをファイルからロードする。 背景セルは128×128ドットのBETA形式
+        でセーブされている必要があるが、  SKIPDOT形式でもよい(内部でconvertす
+        る)。使用には、far領域約18キロバイトが必要である。
+
+void beta_close( beta_t );
+        背景セルの使用を終了し、使用した領域を開放する。
+
+void beta_putat(beta_t beta,int x,int y,int width,int  height,int  X,int  Y);
+void beta_bgputat(beta_t beta,int x,int y,int width,int height,int X,int Y);
+        背景セルの左上(x,y)から大きさ(width,height)の範囲を画面(X,Y)に直接描
+        画する。beta_bgputatは、背景バッファにも同時に書きこむ。なお、 重ね合
+        せは考慮されないので注意。
+
+pattern_t beta_to_sprite(beta_t beta,int x,int y,int width,int height);
+        背景セルの`一部'をスプライトパターンに変換し、sprite_putat,
+        sprite_putoffで 使えるようにする。得られたパターンは、 beta_close後で
+        も使用可能である。
+
+void boxdraw ( int x , int y , unsigned width , unsigned height , int color );
+void boxdrawx( int x , int y , unsigned width , unsigned height , int color );
+void boxfill ( int x , int y , unsigned width , unsigned height , int color );
+void boxfillx( int x , int y , unsigned width , unsigned height , int color );
+        箱を描く。～draw は枠のみ、～fill は中も塗り潰す。～xがついているとき
+        は、カラーコードとGRAMの内容との間でXOR演算を行う。 (x,y)は箱の左上の
+        座標、(width,height)は大きさを表す。
+
+
+★ EMSライブラリ ---------------------------------------------------- "ems.h"
+
+short ems_init( void );
+        EMSを初期化し、ページフレームのセグメントを得る。エラーならば(-1)を返
+        す。
+
+short ems_alloc( unsigned page );
+        pageの数だけのEMSページ(16KB/page)を確保し、そのハンドルを返す。
+
+int ems_map(short handle,short log,short phy);
+        物理ページ:phyを論理ページ:logに割りあてる。log={0,1,2,3};
+
+short ems_free(short handle);
+        EMSを開放する。
+
+short ems_get_size( void );
+        見割りあてのページ数を返す。
+
+
+★ マウス ---------------------------------------------------------- "mice.h"
+
+int mouse_init( void );
+        マウスの初期化。マウスドライバが常駐していないと非0を返す。
+
+int mouse_on(void); int mouse_off(void);
+        マウスの表示のON/OFF
+
+int mouse(short *x,short *y);
+        (*x,*y)にマウスの座標を、    帰り値としてボタンの状態を返す。    x(or
+        y)==NULLのときはx(y)座標は代入しない。
+
+以上はハードウェアスクロールに対応していないが、これはマウスドライバ
+(MOUSE.COM)の仕様のためである。
+
+

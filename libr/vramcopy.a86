@@ -1,0 +1,84 @@
+CGROUP	GROUP	TEXT
+TEXT	CSEG
+
+;;; void vramsave86( 
+;;;	void far *buffer , ... AX:BX
+;;;	size_t size ,      ... CX ... [半角文字数]
+;;;	size_t offset )	   ... DX ... [桁]
+
+vramsave86_::
+	push	ds
+	push	si
+	push	di
+	push	ax
+
+; DS:SI <-- ES:DI <-- VRAMアドレス
+	  mov	di,0B800h
+	  mov	es,di
+	  xor	di,di
+
+	  mov	ah,0FEh
+	  int	10h
+
+	  mov	si,di
+	  mov	ax,es
+	  mov	ds,ax
+
+; ES:DI <-- 保存領域
+	  mov	es,bx
+	pop	di	; pushした AX (bufferのオフセット)
+	shl	dx,1
+	add	si,dx
+	shr	dx,1
+	push	cx
+
+rep	movsw
+
+	pop	cx
+	pop	di
+	pop	si
+	pop	ds
+
+	ret
+
+;;; void vramload86( 
+;;;	void far *buffer , ... AX:BX
+;;;	size_t size ,      ... CX
+;;;	size_t offset )    ... DX
+
+
+vramload86_::
+	push	ds
+	push	si
+	push	di
+	push	cx
+
+; DS:SI <-- 保存領域
+	mov	si,ax
+	mov	ds,bx
+
+; ES:DI <-- VRAMアドレス
+	mov	di,0B800h
+	mov	es,di
+	xor	di,di
+
+	mov	ah,0FEh
+	int	10h
+	
+	shl	dx,1
+	add	di,dx
+	shr	dx,1
+
+	push	di
+rep	movsw
+	pop	di
+	pop	cx
+
+	mov	ah,0FFh
+	int	10h
+
+	pop	di
+	pop	si
+	pop	ds
+	ret
+

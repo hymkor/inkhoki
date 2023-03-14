@@ -1,0 +1,88 @@
+;;;
+;;;	int gputat(int x,int y ,const char *string,int attr)
+;;;		x	= AX
+;;;		y	= BX
+;;;		string	= [bp-8] (CX)
+;;;		attr	= [bp-6] (DX)
+;;;
+;;;	AX,BX,ESしか破壊できない
+;;;
+
+CGROUP	GROUP	TEXT
+TEXT	CSEG
+
+gputat_::
+	push	bp
+	mov	bp,sp
+	push	si	; [bp-2] 
+	push	di	; [bp-4] 
+	push	dx	; [bp-6] 
+	push	cx	; [bp-8] 
+
+	mov	dl,al		; 桁(DL) 
+	mov	dh,bl		; 行(DH) 
+
+; 表示ページを取得する[bh]
+	push	dx
+	push	bp
+	  mov	ah,0xf
+	  int	0x10
+	pop	bp
+	pop	dx
+
+; 文字列の長さを数える	into ECX
+	mov	si,ss:[bp-8]
+	mov	cx,-1
+count:	lodsb
+	inc	cx
+	and	al,al
+	jnz	count		; 文字列サイズ(cx) 
+
+	and	cx,cx		; 文字列長==0 のときは、何もせずにリターンする。
+	je	exit		;  ( CX==0で呼び出すと、DOS-BOXでハングする
+
+	push	cx		; 帰り値の為にセーブする 
+
+	mov	bl,ss:[bp-6]	; 属性(BL) 
+	mov	bp,ss:[bp-8]	; 文字列オフセット(bp) 
+	mov	ax,ds		; 文字列セグメント(es) 
+	mov	es,ax
+
+	mov	ax,0x1300	;	Function	No.と描画モード
+	int	0x10
+
+	pop	ax		; 文字列サイズを回復 
+	
+exit:	pop	cx
+	pop	dx
+	pop	di
+	pop	si
+	pop	bp
+	ret
+
+;;; int gputat_f(int x,int y ,const char far *string,int attr)
+;;; 	x	= AX
+;;; 	y	= BX
+;;; 	string	= DX:CX
+;;; 	attr	= [bp+4]
+;;;  	[bp]....bp
+;;; 	[bp+2]..return address
+;;; 	[bp+4]..attr
+;;;
+
+gputat_f_::
+	push	bp
+	mov	bp,sp
+	push	ds
+	push	dx
+
+	mov	ds,dx
+	mov	dx,[bp+4]
+	call	gputat_
+
+	pop	dx
+	pop	ds
+	pop	bp
+
+	ret
+

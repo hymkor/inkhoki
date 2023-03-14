@@ -1,0 +1,43 @@
+DGROUP	GROUP	DATA
+BSS	DSEG
+
+xms_entry::
+	rm	2
+
+srchdl:	rm	2
+srcoff:	rm	4
+
+dsthdl:	rm	2
+dstoff:	rm	4
+
+
+CGROUP	GROUP	TEXT
+TEXT	CSEG
+
+xms_init_::
+	mov	ax,4300h
+	int	2Fh
+	cmp	al,80h
+	jne	noxms
+	
+	mov	ax,4310h
+	int	2Fh
+	
+	mov	[xms_entry  ].W,bx
+	mov	[xms_entry+2].W,es
+	xor	ax,ax
+	ret
+
+noxms:	mov	ax,-1
+	ret
+
+
+; void read_xms( int handle , unsigned long offset , 
+
+	
+read_xms_::
+	
+
+
+
+
