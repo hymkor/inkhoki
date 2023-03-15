@@ -3,8 +3,23 @@ VGA用パターンエディタ 「いんくほーき」
 
 ![image](./demo.png)
 
-- このソフトウェアは 1993~1995年頃に DOS/V 環境向けに作成したパターンエディタです。
-- 以下は添付の inkhoki.doc (テキストファイル)の内容を markdown 化して、レイアウトを調整したものです。
+- このソフトウェアは 1993~1995年頃に IBM PC/AT 環境向けに作成したパターンエディタです。
+- 当時のリリースバイナリは [0.25c](https://github.com/hymkor/inkhoki/releases/tag/v0.25c) となります
+- 動作には DOS 互換環境が必要となりますが、日本語は用いていないので DOS/V は必ずしも必要ではありません。[DOSBOX] や [DOSBOX-X] で十分です。[^TESTON]
+- リビルド手順は次のとおりです。
+    1. [LSI C-86 Ver.3.30c試食版][LSI C-86] を `C:\LSIC` といったフォルダーに展開します。
+    2. `C:\LSIC\BIN` を環境変数PATHのリストに追加します。
+    3. `C:\LSIC\BIN\_LCC` で `A:\LSIC86` となっている部分を `C:\LSIC` に変更します。
+    4. `libr` フォルダーにて make を実行する。
+    5. `src` フォルダーにて make を実行する。
+
+[LSI C-86]: http://www.lsi-j.co.jp/freesoft/
+[DOSBOX]: https://www.dosbox.com/
+[DOSBOX-X]: https://dosbox-x.com/
+
+[^TESTON]: DOSBOX 0.74-3 , DOSBOX-X 2022.12.26 で確認
+
+以下はオリジナルドキュメントを markdown 化し、レイアウトを調整したものです。
 
 ----------
 
