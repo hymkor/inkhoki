@@ -9,7 +9,7 @@
 #include "keyb.h"
 #include "pe.h"
 
-#define VER "0.25"
+#define VER "0.30"
 
 region_t which_region(int x,int y,int *X,int *Y)
 {
@@ -93,7 +93,7 @@ int main(int argc,char **argv)
 	palette_table_init();
 	edit_screen_flush();
 	
-	writes( 11 , TITLE_LINE , "Ver." VER " 1994,95 (C) K.HAYAMA" , 4  );
+	writes( 11 , TITLE_LINE , "Ver." VER " 1994-2023 (C) K.H" , 4  );
 	writes( 2 , TITLE_LINE , "InkHoki!" , 14 );
 	
 	boxdrawx(REAL_LEFT+CurrentPattern.x,CurrentPattern.y,EditSize,EditSize,15);
@@ -147,18 +147,16 @@ exit:
 			"VGA Pattern Editor \"InkHoki\"「いんくほーき」 Version " VER "\n"
 			"\n"
 			"Compiled on " __DATE__ " with LSI C-86 Ver.3.30c 試食版\n"
-			"Copyright (C) 1994,95 by K.HaYaMa (葉山 薫)\n"
-			"Copyleft for private uses.\n"
-			"Bug reports to hay@kmc.kyoto-u.ac.jp\n"
+			"Copyright (C) 1994,1995,2023 by K.HaYaMa (葉山 薫)\n"
+			"Bug reports to iyahaya@nifty.com\n"
 			"\n"
 			"Thank you for using InkHoki!\n"
 		:
 			"VGA Pattern Editor \"InkHoki\" Version " VER "\n"
 			"\n"
 			"Compiled on " __DATE__ " with LSI C-86 Ver.3.30c SISHOKU-BAN\n"
-			"Copyright (C) 1994,95 by Kaoru Hayama \n"
-			"Copyleft for private uses.\n"
-			"Bug reports to hay@kmc.kyoto-u.ac.jp\n"
+			"Copyright (C) 1994,1995,2023 by Kaoru Hayama \n"
+			"Bug reports to iyahaya@nifty.com\n"
 			"\n"
 			"Thank you for using InkHoki!\n"
 		, stderr );
@@ -166,4 +164,3 @@ exit:
 	return 0;
 }
 cmdid_t prevcmd = (cmdid_t)main;
-
